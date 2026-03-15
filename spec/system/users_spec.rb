@@ -1,14 +1,14 @@
 require 'rails_helper'
- 
+
 describe 'User', type: :system do
   before { driven_by :rack_test }
- 
+
   # ユーザー情報入力用の変数
   let(:email) { 'test@example.com' }
   let(:nickname) { 'テスト太郎' }
   let(:password) { 'password' }
   let(:password_confirmation) { password }
- 
+
   describe 'ユーザー登録機能の検証' do
     before { visit '/users/sign_up' }
  
@@ -104,7 +104,7 @@ describe 'User', type: :system do
       end
     end
   end
- 
+
   describe 'ログイン機能の検証' do
     before do
       create(:user, nickname: nickname, email: email, password: password, password_confirmation: password) # ユーザー作成
@@ -136,7 +136,7 @@ describe 'User', type: :system do
       end
     end
   end
- 
+
   describe 'ログアウト機能の検証' do
     before do
       user = create(:user, nickname: nickname, email: email, password: password, password_confirmation: password) # ユーザー作成
@@ -151,6 +151,30 @@ describe 'User', type: :system do
  
     it 'ログアウト時のフラッシュメッセージを表示する' do
       expect(page).to have_content('ログアウトしました。')
+    end
+  end
+
+  describe 'ユーザーページの検証' do
+    before do
+      @user = create(:user)
+      @post = create(:post, title: 'テスト投稿', content: 'ユーザーページ表示テスト', user: @user)
+
+      visit "/users/#{@user.id}" # ユーザー詳細ページにアクセス
+    end
+
+    it 'ユーザー情報が表示される' do
+      expect(page).to have_content(@user.nickname) # ニックネームが表示されていることを確認
+      expect(page).to have_content("全投稿数: 1件") # 投稿数が表示されていることを確認
+    end
+
+    it '投稿一覧が表示される' do
+      expect(page).to have_content('テスト投稿') # 投稿のタイトルが表示されていることを確認
+      expect(page).to have_content('ユーザーページ表示テスト') # 投稿の内容が表示されていることを確認
+    end
+
+    it '投稿の詳細ページへのリンクが機能する' do
+      click_link 'テスト投稿' # 投稿のタイトルをクリック
+      expect(current_path).to eq("/posts/#{@post.id}") # 投稿詳細ページに遷移していることを確認
     end
   end
 end
