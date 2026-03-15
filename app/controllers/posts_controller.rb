@@ -27,10 +27,21 @@ class PostsController < ApplicationController
   end
 
   def destroy
+    # 削除対象の投稿を取得
+    post = Post.find_by(id: params[:id])
+
+    # 投稿者とログインユーザーが一致するかを確認
+    if post.user == current_user
+      post.destroy
+      flash[:notice] = '投稿が削除されました'
+    end
+
+    # 投稿一覧ページにリダイレクト
+    redirect_to posts_path
   end
 
   private # controllerの中でしか呼び出しできないメソッド
- 
+
   # ストロングパラメータで許可するカラムを指定
   def post_params
     params.require(:post).permit(:title, :content) # title と content のみ許可
